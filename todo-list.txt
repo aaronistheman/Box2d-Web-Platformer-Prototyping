@@ -1,0 +1,5 @@
+-make the box like a platformer protagonist
+    --he'll only move up if he's touching the ground
+    --pressing down doesn't do anything
+    --find the right force to apply
+    --allow multiple arrow keys to have effect
