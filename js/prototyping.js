@@ -114,7 +114,7 @@ $(document).ready(function() {
     var boxBd = new b2BodyDef();
     boxBd.AddShape(boxSd);
     boxBd.position.Set(50, 210);
-    game.world.CreateBody(boxBd);
+    game.box = game.world.CreateBody(boxBd);
     
     // get the reference of the context
     canvas = document.getElementById('game');
@@ -126,4 +126,30 @@ $(document).ready(function() {
     
     // start advancing the step
     step();
+    
+    var forceAmount = 10000000;
+    $(document).keydown(function(e) {
+        switch(e.keyCode) {
+            case 37: // left arrow key
+                var force = new b2Vec2(-forceAmount, 0);
+                game.box.ApplyForce(force,
+                    game.box.GetCenterPosition());
+                break;
+            case 38: // up arrow key
+                var force = new b2Vec2(0, -forceAmount);
+                game.box.ApplyForce(force,
+                    game.box.GetCenterPosition());
+                break;
+            case 39: // right arrow key
+                var force = new b2Vec2(forceAmount, 0);
+                game.box.ApplyForce(force,
+                    game.box.GetCenterPosition());
+                break;
+            case 40: // down arrow key
+                var force = new b2Vec2(0, forceAmount);
+                game.box.ApplyForce(force,
+                    game.box.GetCenterPosition());
+                break;
+        }
+    });
 });
