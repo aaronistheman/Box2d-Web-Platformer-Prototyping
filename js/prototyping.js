@@ -4,6 +4,7 @@ var game = {};
 game.box;
 game.boxAndGroundTouch = false;
 game.ground;
+game.keyboard = [];
 
 var canvas;
 var ctx;
@@ -100,8 +101,17 @@ function step() {
     game.world.Step(1.0/60, 1);
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     drawWorld(game.world, ctx);
-    setTimeout(step, 10);
     checkCollisions();
+    updateForcesAndApply();
+    updateVelocityReadings();
+    setTimeout(step, 10);
+}
+
+function updateVelocityReadings() {
+    var velocity = game.box.GetLinearVelocity();
+    console.log(velocity.x)
+    $("#horizontal-velocity").html(velocity.x);
+    $("#vertical-velocity").html(velocity.y);
 }
 
 function checkCollisions() {
@@ -120,27 +130,36 @@ function checkCollisions() {
     game.boxAndGroundTouch = boxAndGroundTouch;
 }
 
-function calculateForceAndApply(e) {
+function updateForcesAndApply() {
     var force = {x : 0, y : 0};
+    var velocity = game.box.GetLinearVelocity();
+    var maximumHorizontalVelocity = 30;
     var sidewaysForceAmount = 1e7;
     var jumpForceAmount = 3e7;
     
-    if (e.which === 37) {
+    if (game.keyboard[37] && (velocity.x > -maximumHorizontalVelocity)) {
         // left arrow key
-        force.x = -sidewaysForceAmount;
+        force.x -= sidewaysForceAmount;
     }
-    if (e.which === 38) { 
+    if (game.keyboard[38]) { 
         // up arrow key
         if (game.boxAndGroundTouch) {
-            force.y = -jumpForceAmount;
+            force.y -= jumpForceAmount;
         }
     }
-    if (e.which === 39) {
+    if (game.keyboard[39] && (velocity.x < maximumHorizontalVelocity)) {
         // right arrow key
-        force.x = sidewaysForceAmount;
+        force.x += sidewaysForceAmount;
     }
+    
     game.box.ApplyForce(new b2Vec2(force.x, force.y),
         game.box.GetCenterPosition());
+    
+    // Restrain velocity
+    if (velocity.x > maximumHorizontalVelocity)
+        velocity.x = maximumHorizontalVelocity;
+    else if (velocity.x < -maximumHorizontalVelocity)
+        velocity.x = -maximumHorizontalVelocity;
 }
 
 function createBox() {
@@ -174,7 +193,13 @@ $(document).ready(function() {
     step();
     
     $(document).keydown(function(e) {
-        if (e.which === 37 || e.which === 38 || e.which === 39)
-            calculateForceAndApply(e);
+        if (e.which === 37 || e.which === 38 || e.which === 39) {
+            game.keyboard[e.which] = true;
+        }
+    });
+    $(document).keyup(function(e) {
+        if (e.which === 37 || e.which === 38 || e.which === 39) {
+            game.keyboard[e.which] = false;
+        }
     });
 });
