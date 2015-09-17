@@ -1,6 +1,9 @@
 "use strict";
 
 var game = {};
+game.box;
+game.boxAndGroundTouch = false;
+game.ground;
 
 var canvas;
 var ctx;
@@ -30,7 +33,7 @@ function createGround() {
     // box shape definition
     var groundSd = new b2BoxDef();
     groundSd.extents.Set(250, 25);
-    groundSd.restitution = 0.4;
+    groundSd.restitution = 0.0;
     
     // body definition with the given shape we just created.
     var groundBd = new b2BodyDef();
@@ -98,18 +101,35 @@ function step() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     drawWorld(game.world, ctx);
     setTimeout(step, 10);
+    checkCollisions();
+}
+
+function checkCollisions() {
+    $("#status").html("no");
+    var boxAndGroundTouch = false;
+    for (var cn = game.world.GetContactList(); cn != null;
+        cn = cn.GetNext())
+    {
+        var body1 = cn.GetShape1().GetBody();
+        var body2 = cn.GetShape2().GetBody();
+        if ((body1 == game.box && body2 == game.ground) ||
+            (body2 == game.box && body1 == game.ground))
+            $("#status").html("yes");
+            boxAndGroundTouch = true;
+    }
+    game.boxAndGroundTouch = boxAndGroundTouch;
 }
 
 $(document).ready(function() {
     game.world = createWorld();
-    createGround();
+    game.ground = createGround();
     
     // create a box
     var boxSd = new b2BoxDef();
     boxSd.density = 1.0;
     boxSd.friction = 1.5;
-    boxSd.restitution = 0.4;
-    boxSd.extents.Set(40, 20);
+    boxSd.restitution = 0.0;
+    boxSd.extents.Set(20, 20);
     
     var boxBd = new b2BodyDef();
     boxBd.AddShape(boxSd);
@@ -127,26 +147,24 @@ $(document).ready(function() {
     // start advancing the step
     step();
     
-    var forceAmount = 10000000;
+    var sidewaysForceAmount = 1e7;
+    var jumpForceAmount = 3e7;
     $(document).keydown(function(e) {
         switch(e.keyCode) {
             case 37: // left arrow key
-                var force = new b2Vec2(-forceAmount, 0);
+                var force = new b2Vec2(-sidewaysForceAmount, 0);
                 game.box.ApplyForce(force,
                     game.box.GetCenterPosition());
                 break;
             case 38: // up arrow key
-                var force = new b2Vec2(0, -forceAmount);
-                game.box.ApplyForce(force,
-                    game.box.GetCenterPosition());
+                if (game.boxAndGroundTouch) {
+                    var force = new b2Vec2(0, -jumpForceAmount);
+                    game.box.ApplyForce(force,
+                        game.box.GetCenterPosition());
+                }
                 break;
             case 39: // right arrow key
-                var force = new b2Vec2(forceAmount, 0);
-                game.box.ApplyForce(force,
-                    game.box.GetCenterPosition());
-                break;
-            case 40: // down arrow key
-                var force = new b2Vec2(0, forceAmount);
+                var force = new b2Vec2(sidewaysForceAmount, 0);
                 game.box.ApplyForce(force,
                     game.box.GetCenterPosition());
                 break;
