@@ -1,5 +1,5 @@
 -make the box like a platformer protagonist
-    --he'll only move up if he's touching the ground
-    --pressing down doesn't do anything
-    --find the right force to apply
-    --allow multiple arrow keys to have effect
+    --try setting horizontal velocity instead of using force
+    --limit vertical force
+-experiment with boomerang
+-experiment with wall jumping

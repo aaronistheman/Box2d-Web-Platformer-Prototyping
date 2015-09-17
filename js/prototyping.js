@@ -1,6 +1,10 @@
 "use strict";
 
 var game = {};
+game.box;
+game.boxAndGroundTouch = false;
+game.ground;
+game.keyboard = [];
 
 var canvas;
 var ctx;
@@ -30,7 +34,7 @@ function createGround() {
     // box shape definition
     var groundSd = new b2BoxDef();
     groundSd.extents.Set(250, 25);
-    groundSd.restitution = 0.4;
+    groundSd.restitution = 0.0;
     
     // body definition with the given shape we just created.
     var groundBd = new b2BodyDef();
@@ -97,24 +101,85 @@ function step() {
     game.world.Step(1.0/60, 1);
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     drawWorld(game.world, ctx);
+    checkCollisions();
+    updateForcesAndApply();
+    updateVelocityReadings();
     setTimeout(step, 10);
 }
 
-$(document).ready(function() {
-    game.world = createWorld();
-    createGround();
+function updateVelocityReadings() {
+    var velocity = game.box.GetLinearVelocity();
+    console.log(velocity.x)
+    $("#horizontal-velocity").html(velocity.x);
+    $("#vertical-velocity").html(velocity.y);
+}
+
+function checkCollisions() {
+    $("#status").html("no");
+    var boxAndGroundTouch = false;
+    for (var cn = game.world.GetContactList(); cn != null;
+        cn = cn.GetNext())
+    {
+        var body1 = cn.GetShape1().GetBody();
+        var body2 = cn.GetShape2().GetBody();
+        if ((body1 == game.box && body2 == game.ground) ||
+            (body2 == game.box && body1 == game.ground))
+            $("#status").html("yes");
+            boxAndGroundTouch = true;
+    }
+    game.boxAndGroundTouch = boxAndGroundTouch;
+}
+
+function updateForcesAndApply() {
+    var force = {x : 0, y : 0};
+    var velocity = game.box.GetLinearVelocity();
+    var maximumHorizontalVelocity = 30;
+    var sidewaysForceAmount = 1e7;
+    var jumpForceAmount = 3e7;
     
-    // create a box
+    if (game.keyboard[37] && (velocity.x > -maximumHorizontalVelocity)) {
+        // left arrow key
+        force.x -= sidewaysForceAmount;
+    }
+    if (game.keyboard[38]) { 
+        // up arrow key
+        if (game.boxAndGroundTouch) {
+            force.y -= jumpForceAmount;
+        }
+    }
+    if (game.keyboard[39] && (velocity.x < maximumHorizontalVelocity)) {
+        // right arrow key
+        force.x += sidewaysForceAmount;
+    }
+    
+    game.box.ApplyForce(new b2Vec2(force.x, force.y),
+        game.box.GetCenterPosition());
+    
+    // Restrain velocity
+    if (velocity.x > maximumHorizontalVelocity)
+        velocity.x = maximumHorizontalVelocity;
+    else if (velocity.x < -maximumHorizontalVelocity)
+        velocity.x = -maximumHorizontalVelocity;
+}
+
+function createBox() {
     var boxSd = new b2BoxDef();
     boxSd.density = 1.0;
     boxSd.friction = 1.5;
-    boxSd.restitution = 0.4;
-    boxSd.extents.Set(40, 20);
+    boxSd.restitution = 0.0;
+    boxSd.extents.Set(20, 20);
     
     var boxBd = new b2BodyDef();
     boxBd.AddShape(boxSd);
     boxBd.position.Set(50, 210);
-    game.box = game.world.CreateBody(boxBd);
+    boxBd.preventRotation = true;
+    return game.world.CreateBody(boxBd);
+}
+
+$(document).ready(function() {
+    game.world = createWorld();
+    game.ground = createGround();
+    game.box = createBox();
     
     // get the reference of the context
     canvas = document.getElementById('game');
@@ -127,29 +192,14 @@ $(document).ready(function() {
     // start advancing the step
     step();
     
-    var forceAmount = 10000000;
     $(document).keydown(function(e) {
-        switch(e.keyCode) {
-            case 37: // left arrow key
-                var force = new b2Vec2(-forceAmount, 0);
-                game.box.ApplyForce(force,
-                    game.box.GetCenterPosition());
-                break;
-            case 38: // up arrow key
-                var force = new b2Vec2(0, -forceAmount);
-                game.box.ApplyForce(force,
-                    game.box.GetCenterPosition());
-                break;
-            case 39: // right arrow key
-                var force = new b2Vec2(forceAmount, 0);
-                game.box.ApplyForce(force,
-                    game.box.GetCenterPosition());
-                break;
-            case 40: // down arrow key
-                var force = new b2Vec2(0, forceAmount);
-                game.box.ApplyForce(force,
-                    game.box.GetCenterPosition());
-                break;
+        if (e.which === 37 || e.which === 38 || e.which === 39) {
+            game.keyboard[e.which] = true;
+        }
+    });
+    $(document).keyup(function(e) {
+        if (e.which === 37 || e.which === 38 || e.which === 39) {
+            game.keyboard[e.which] = false;
         }
     });
 });
