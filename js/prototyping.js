@@ -143,11 +143,7 @@ function calculateForceAndApply(e) {
         game.box.GetCenterPosition());
 }
 
-$(document).ready(function() {
-    game.world = createWorld();
-    game.ground = createGround();
-    
-    // create a box
+function createBox() {
     var boxSd = new b2BoxDef();
     boxSd.density = 1.0;
     boxSd.friction = 1.5;
@@ -158,7 +154,13 @@ $(document).ready(function() {
     boxBd.AddShape(boxSd);
     boxBd.position.Set(50, 210);
     boxBd.preventRotation = true;
-    game.box = game.world.CreateBody(boxBd);
+    return game.world.CreateBody(boxBd);
+}
+
+$(document).ready(function() {
+    game.world = createWorld();
+    game.ground = createGround();
+    game.box = createBox();
     
     // get the reference of the context
     canvas = document.getElementById('game');
