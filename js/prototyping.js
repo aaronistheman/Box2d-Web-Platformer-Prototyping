@@ -157,6 +157,7 @@ $(document).ready(function() {
     var boxBd = new b2BodyDef();
     boxBd.AddShape(boxSd);
     boxBd.position.Set(50, 210);
+    boxBd.preventRotation = true;
     game.box = game.world.CreateBody(boxBd);
     
     // get the reference of the context

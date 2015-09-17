@@ -1,3 +1,4 @@
 -make the box like a platformer protagonist
-    --don't allow the box to rotate
     --don't let box go higher up and up
+    --detect two keys at once
+    --limit horizontal force
