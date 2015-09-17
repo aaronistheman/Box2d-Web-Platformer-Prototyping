@@ -146,7 +146,7 @@ function checkCollisions() {
 function updateForcesAndApply() {
     var force = {x : 0, y : 0};
     var velocity = game.box.GetLinearVelocity();
-    var maximumHorizontalVelocity = 30;
+    var maximumHorizontalVelocity = 80;
     var sidewaysForceAmount = 1e7;
     var jumpForceAmount = 1e7;
     
