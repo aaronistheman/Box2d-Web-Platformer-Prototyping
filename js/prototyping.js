@@ -45,6 +45,19 @@ function createGround() {
     return body;
 }
 
+function createBox() {
+    var boxSd = new b2BoxDef();
+    boxSd.density = 1.0;
+    boxSd.friction = 1.5;
+    boxSd.restitution = 0.0;
+    boxSd.extents.Set(20, 20);
+    
+    var boxBd = new b2BodyDef();
+    boxBd.AddShape(boxSd);
+    boxBd.position.Set(50, 210);
+    boxBd.preventRotation = true;
+    return game.world.CreateBody(boxBd);
+}
 
 // drawing functions
 function drawWorld(world, context) {
@@ -133,9 +146,9 @@ function checkCollisions() {
 function updateForcesAndApply() {
     var force = {x : 0, y : 0};
     var velocity = game.box.GetLinearVelocity();
-    var maximumHorizontalVelocity = 30;
+    var maximumHorizontalVelocity = 80;
     var sidewaysForceAmount = 1e7;
-    var jumpForceAmount = 3e7;
+    var jumpForceAmount = 1e7;
     
     if (game.keyboard[37] && (velocity.x > -maximumHorizontalVelocity)) {
         // left arrow key
@@ -160,20 +173,6 @@ function updateForcesAndApply() {
         velocity.x = maximumHorizontalVelocity;
     else if (velocity.x < -maximumHorizontalVelocity)
         velocity.x = -maximumHorizontalVelocity;
-}
-
-function createBox() {
-    var boxSd = new b2BoxDef();
-    boxSd.density = 1.0;
-    boxSd.friction = 1.5;
-    boxSd.restitution = 0.0;
-    boxSd.extents.Set(20, 20);
-    
-    var boxBd = new b2BodyDef();
-    boxBd.AddShape(boxSd);
-    boxBd.position.Set(50, 210);
-    boxBd.preventRotation = true;
-    return game.world.CreateBody(boxBd);
 }
 
 $(document).ready(function() {
