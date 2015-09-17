@@ -1,3 +1,5 @@
 -make the box like a platformer protagonist
     --try setting horizontal velocity instead of using force
     --limit vertical force
+-experiment with boomerang
+-experiment with wall jumping
