@@ -120,6 +120,29 @@ function checkCollisions() {
     game.boxAndGroundTouch = boxAndGroundTouch;
 }
 
+function calculateForceAndApply(e) {
+    var force = {x : 0, y : 0};
+    var sidewaysForceAmount = 1e7;
+    var jumpForceAmount = 3e7;
+    
+    if (e.which === 37) {
+        // left arrow key
+        force.x = -sidewaysForceAmount;
+    }
+    if (e.which === 38) { 
+        // up arrow key
+        if (game.boxAndGroundTouch) {
+            force.y = -jumpForceAmount;
+        }
+    }
+    if (e.which === 39) {
+        // right arrow key
+        force.x = sidewaysForceAmount;
+    }
+    game.box.ApplyForce(new b2Vec2(force.x, force.y),
+        game.box.GetCenterPosition());
+}
+
 $(document).ready(function() {
     game.world = createWorld();
     game.ground = createGround();
@@ -147,27 +170,8 @@ $(document).ready(function() {
     // start advancing the step
     step();
     
-    var sidewaysForceAmount = 1e7;
-    var jumpForceAmount = 3e7;
     $(document).keydown(function(e) {
-        switch(e.keyCode) {
-            case 37: // left arrow key
-                var force = new b2Vec2(-sidewaysForceAmount, 0);
-                game.box.ApplyForce(force,
-                    game.box.GetCenterPosition());
-                break;
-            case 38: // up arrow key
-                if (game.boxAndGroundTouch) {
-                    var force = new b2Vec2(0, -jumpForceAmount);
-                    game.box.ApplyForce(force,
-                        game.box.GetCenterPosition());
-                }
-                break;
-            case 39: // right arrow key
-                var force = new b2Vec2(sidewaysForceAmount, 0);
-                game.box.ApplyForce(force,
-                    game.box.GetCenterPosition());
-                break;
-        }
+        if (e.which === 37 || e.which === 38 || e.which === 39)
+            calculateForceAndApply(e);
     });
 });
