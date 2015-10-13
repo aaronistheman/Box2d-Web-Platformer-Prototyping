@@ -1,0 +1,8 @@
+Next:
+-experiment with boomerang
+-experiment with wall jumping
+
+Considerable:
+-gradual speed changes
+-making the friction 0; would require zeroing the speed if neither
+    the left arrow key nor the right one were pressed
